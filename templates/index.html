@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Colour Palette Generator</title>
+    {% block styles %}
+    {{ bootstrap.load_css() }}
+    <link rel="stylesheet" href="static/css/style.css" >
+    {% endblock %}
+</head>
+<body>
+<div class="container">
+    <header class="d-flex justify-content-center py-3">
+      <span class="fs-4" style="background-color: #ECF4D6">Image Colour Palette Generator</span>
+    </header>
+</div>
+{% if not dominant_colors %}
+<div class="container justify-content-center py-3">
+    <form method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        {{ form.photo(class="form-control") }}
+        {{ form.submit(class="btn")}}
+    </form>
+</div>
+{% endif %}
+
+{% if dominant_colors %}
+<div class="justify-content-center">
+    <div class="justify-content-center py-3">
+        <img src="{{ file }}" alt="Uploaded photo" class="rounded mx-auto d-block img-fluid">
+    </div>
+    <div class="row">
+    {% for index in range(10) %}
+    <div class="d-flex justify-content-center px-2 py-3 col-md-auto">
+        <span class="badge d-flex align-items-center p-1 pe-2 border border-primary-subtle rounded-pill py-2">
+            <span class="dot" style="background-color: {{ dominant_colors[index] }};"></span> {{ dominant_colors[index].upper() }} {{ color_occurrences[index] }}%
+        </span>
+    </div>
+    {% endfor %}
+    </div>
+</div>
+<div class="container py-3 px-3"><a class="btn float-end py-1 px-3" href="{{ url_for('main_page') }}" role="button">Restart</a></div>
+
+{% endif %}
+
+
+
+{% block scripts %}
+{{ bootstrap.load_js() }}
+{% endblock %}
+</body>
+</html>

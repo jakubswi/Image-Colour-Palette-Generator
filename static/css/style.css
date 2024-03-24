@@ -1,0 +1,18 @@
+.dot {
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  display: inline-block;
+}
+body {
+    background-color: #ECF4D6;
+    color: #265073;
+}
+span {
+    background-color:  #2D9596;
+    color: #265073;
+}
+.btn {
+    background-color: #2D9596;
+    color: #ECF4D6;
+}
