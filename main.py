@@ -2,11 +2,16 @@ import os
 
 import numpy as np
 from PIL import Image
-from flask import Flask, render_template, send_from_directory
+from flask import (
+    Flask,
+    Response,
+    jsonify,
+    render_template,
+)
 from flask_bootstrap import Bootstrap5
-from flask_uploads import UploadSet, IMAGES, configure_uploads
+from flask_uploads import IMAGES, UploadSet, configure_uploads
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired, FileAllowed
+from flask_wtf.file import FileAllowed, FileField, FileRequired
 from sklearn.cluster import KMeans
 from wtforms import SubmitField
 
@@ -22,6 +27,29 @@ class UploadForm(FlaskForm):
     photo = FileField(
         validators=[FileAllowed(photos, 'Only images are allowed'), FileRequired('File field should not be empty')])
     submit = SubmitField("Upload")
+
+
+@app.route('/analyze', methods=["POST"])
+def analyze():
+    form = UploadForm()
+    if not form.validate_on_submit():
+        return Response("Bad request", 400)
+
+    file = photos.save(form.photo.data)
+    photo_path = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], file)
+    try:
+        dominant_colors_hex, color_occurrences = get_dominant_colors(
+            photo_path
+            )
+        return jsonify(
+            [{
+                "color": color_hex, "occurrence": f"{occurrence:.4f}"
+            } for color_hex, occurrence in
+                zip(dominant_colors_hex, color_occurrences)
+            ]
+        )
+    finally:
+        os.remove(photo_path)
 
 
 def get_dominant_colors(image_path):
@@ -45,23 +73,10 @@ def get_dominant_colors(image_path):
     return dominant_colors_hex, color_occurrences
 
 
-@app.route('/uploads/<filename>')
-def get_file(filename):
-    return send_from_directory(app.config['UPLOADED_PHOTOS_DEST'], filename)
-
-
 @app.route('/', methods=["GET", "POST"])
 def main_page():
     form = UploadForm()
-    if form.validate_on_submit():
-        file = photos.save(form.photo.data)
-        photo_path = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], file)
-        dominant_colors_hex, color_occurrences = get_dominant_colors(photo_path)
-        color_occurrences = [f"{color:.4f}" for color in color_occurrences]
-        return render_template("index.html", dominant_colors=dominant_colors_hex, color_occurrences=color_occurrences,
-                               file=photo_path, form=form)
-    return render_template("index.html", dominant_colors=None, color_occurrences=None,
-                           file=None, form=form)
+    return render_template("index.html", form=form)
 
 
 if __name__ == "__main__":
