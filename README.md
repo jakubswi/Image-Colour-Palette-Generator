@@ -17,13 +17,11 @@ This is a Python Flask application that allows users to upload images and analyz
 2. Install the required dependencies:
     ```bash
    pip install -r requirements.txt
-   
 
 ## Usage
 1. Run the Flask application:
    ```bash
    python app.py
-   
 
 2. Open your web browser and go to `http://localhost:5000` to access the application.
 
